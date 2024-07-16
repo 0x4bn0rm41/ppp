@@ -1,0 +1,128 @@
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>[]</title>
+	<script src="{{url_for('static', filename='jq.js')}}"></script>
+	<link rel="stylesheet" href="{{url_for('static', filename='css.css')}}">
+</head>
+<body>
+	<div class="menu">
+		<span class="newnote">[+]</span>
+		<span>[ {{count}} ] notes</span>
+	</div>
+
+	<div class="notes">
+		{% if Notes  %}
+		{% for note in Notes %}
+			{% set id = note.id %}
+			{% set content = note.content %}
+			<!-- {% set date_creation = note.date_creation %} -->
+			<!-- {% set date_change = note.date_change %} -->
+			{% include 'note.html'%} 
+		{% endfor %}
+		{% endif %}
+
+
+	</div>
+
+<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+<script>
+let date_creation;
+let notes = [];
+function note_data(date, c, id) {
+	this.creation =  date;
+	this.content = c;
+	this.id = id;
+
+}
+
+
+
+$(document).on('click touchend', (e)=>{
+
+if (e.target.tagName == "BODY"){
+	for (let t of $('textarea')){
+		if( !t.hasAttribute('readonly'))
+		{
+			t.setAttribute('readonly', '')
+			t.addEventListener('animationend', (e)=>{e.target.classList.remove('animate')})
+			t.classList.add('animate')
+			date_creation = ~~(new Date().getTime()/1000);
+
+			// note_data.date_creation = 
+			// note_data.content = 
+			// note_data.id =
+			
+					
+			 fetch('/', {
+				method: "POST",
+				mode: "cors", // no-cors, *cors, same-origin
+				cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+				credentials: "same-origin", // include, *
+				headers: {
+				  "Content-Type": "application/json",
+				  // 'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				// redirect: "follow", // manual, *follow, error
+				// referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, ori gin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+				
+				body: JSON.stringify(new note_data(t.date_creation, t.value,  t.dataset.id == '' ? null : t.dataset.id)),
+				});
+		}
+		else{
+			// t.classList.remove(animate)
+		}
+	}
+}
+else if (e.target.classList == "edit"){
+	console.log(e.target.parentElement.lastElementChild.firstElementChild)
+	e.target.parentElement.lastElementChild.firstElementChild.removeAttribute('readonly')
+
+}
+else if (e.target.classList == "delete button"){
+	console.log(e.target.parentElement.lastElementChild.firstElementChild.value)
+	e.target.parentElement.remove()
+	let t = e.target.parentElement.lastElementChild.firstElementChild;
+	console.log(new note_data(0,t.value,t.dataset.id))
+
+	if (t.dataset.id){
+	fetch('/', {
+		method: "DELETE",
+		// mode: "same-origin",
+		// cache: "no-cache",
+		// credentials: "same-origin",
+		headers: {
+		  "Content-Type": "application/json",
+		  
+		},
+		body: JSON.stringify(
+			{id:t.dataset.id})
+		// body: JSON.stringify(note_data(0, e.target.parentElement.lastElementChild.firstElementChild.value, e.target.parentElement.lastElementChild.firstElementChild.dataset.id))
+		});
+	}
+}
+
+});
+
+
+$('.newnote').on('click', (e)=>{
+	console.log(e.target)
+	date_creation = Math.round(new Date().getTime() / 1000);
+	$('.notes').prepend(`{% include 'note.html' %}`)
+
+});
+
+// $('.delete').on('click', (e)=>{
+// 	console.log(e.target.parentElement);
+
+// });
+
+
+
+
+</script>
+
+
+
+</script>
+<script src="{{url_for('static', filename='js.js')}}"></script>
