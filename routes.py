@@ -6,7 +6,7 @@ import datetime
 from decorators import nocache
 
 @app.route("/", methods=['POST', 'GET', "DELETE"])
-@nocache
+@nocachexe
 def index():
 	notes = Note.query.all() 
 	
